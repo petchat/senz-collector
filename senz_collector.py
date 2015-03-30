@@ -21,9 +21,9 @@ def SenzCollector(**time_lines):
         Every sequence also is a dict, key is the name of time line, and value is a list which contains timestamp seqs.
         Key can be any word. The selected key will be *primary key* which clustering algo based on.
         eg. {
-                "key 0": [key0_timestamp1, key0_timestamp2, ...],
-                "key 1": [key1_timestamp1, key1_timestamp2, ...],
-                "key 2": [key2_timestamp1, key2_timestamp2, ...],
+                "key 0": [key0_timestamp0, key0_timestamp1, ...],
+                "key 1": [key1_timestamp0, key1_timestamp1, ...],
+                "key 2": [key2_timestamp0, key2_timestamp1, ...],
                 ...
                 "primaryKey": "key 0"
             }
@@ -31,9 +31,10 @@ def SenzCollector(**time_lines):
         Return value is a list, the item of return list is a dict which contains N sub-dict( key: key_timestamp ).
         eg. [
                 {
+                    "senzTimestamp": key0_timestamp0,
                     "key0": key0_timestamp0,
                     "key1": key1_timestamp1,
-                    "key2": key0_timestamp0,
+                    "key2": key2_timestamp0,
                     ...
                 },
                 ...
@@ -43,16 +44,32 @@ def SenzCollector(**time_lines):
     # then get the primary key, and remove the primary key from input.
     if time_lines.has_key("primaryKey"):
         primary_key = time_lines.pop("primaryKey")
-        ClusteringByPrimaryKey(primary_key, time_lines)
+        return ClusteringBaseOnPrimaryKey(primary_key, time_lines)
 
-    ClusteringDecentralized(time_lines)
+    return ClusteringDecentralized(time_lines)
 
 
-def ClusteringByPrimaryKey(primary_key, time_lines):
-    pass
+def ClusteringBaseOnPrimaryKey(primary_key, time_lines):
+    result_list = []
+    # Scan the primary key list's timestamp one by one.
+    for primary_timestamp in time_lines.pop(primary_key):
+        # Select the closest timestamp to primary key timestamp in different time line
+        senz_tuple = {primary_key: primary_timestamp}
+        for (key, time_line) in time_lines.items():
+            min_delta = 99999999999
+            # Compare every timestamp with primary key timestamp in time line.
+            for normal_timestamp in time_line:
+                if abs(primary_timestamp - normal_timestamp) < min_delta:
+                    min_delta = abs(primary_timestamp - normal_timestamp)
+                else:
+                    break
+            senz_tuple[key] = normal_timestamp
+        result_list.append(senz_tuple)
+    return result_list
+
 
 def ClusteringDecentralized(time_lines):
-    pass
+    return []
 
 if __name__ == "__main__":
-    SenzCollector(key0=[], key1=[], key2=[], primaryKey="key0")
+    print SenzCollector(key0=[1,2,3], key1=[1,2,3], key2=[1,2,3], primaryKey="key0")
