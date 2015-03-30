@@ -1,6 +1,6 @@
 __author__ = 'woodie'
 
-def SenzCollector(**time_lines):
+def SenzCollector(filter=2, **time_lines):
     '''
     SENZ COLLECTOR
 
@@ -40,36 +40,64 @@ def SenzCollector(**time_lines):
                 ...
             ]
     '''
-    # If there is primary key
+    # If there is primary key,
     # then get the primary key, and remove the primary key from input.
     if time_lines.has_key("primaryKey"):
         primary_key = time_lines.pop("primaryKey")
-        return ClusteringBaseOnPrimaryKey(primary_key, time_lines)
+        return SenzFilter(ClusteringBaseOnPrimaryKey(primary_key, time_lines), filter)
+    # If there is no primary key,
+    # then it will clutering decentralized.
+    return SenzFilter(ClusteringDecentralized(time_lines), filter)
 
-    return ClusteringDecentralized(time_lines)
 
 
 def ClusteringBaseOnPrimaryKey(primary_key, time_lines):
     result_list = []
     # Scan the primary key list's timestamp one by one.
     for primary_timestamp in time_lines.pop(primary_key):
-        # Select the closest timestamp to primary key timestamp in different time line
         senz_tuple = {primary_key: primary_timestamp}
+        # Select the closest timestamp to primary key timestamp in different time line
         for (key, time_line) in time_lines.items():
-            min_delta = 99999999999
+            min_delta        = 99999999999
+            closet_timestamp = 0
             # Compare every timestamp with primary key timestamp in time line.
             for normal_timestamp in time_line:
                 if abs(primary_timestamp - normal_timestamp) < min_delta:
-                    min_delta = abs(primary_timestamp - normal_timestamp)
+                    min_delta        = abs(primary_timestamp - normal_timestamp)
+                    closet_timestamp = normal_timestamp
                 else:
                     break
-            senz_tuple[key] = normal_timestamp
+            senz_tuple[key] = closet_timestamp
         result_list.append(senz_tuple)
     return result_list
+
 
 
 def ClusteringDecentralized(time_lines):
     return []
 
+
+
+def SenzFilter(tuple_list, filter):
+    for tuple in tuple_list:
+        # Expectation of timestamps in a tuple
+        expectation = 0
+        for timestamp in tuple.values():
+            expectation += timestamp
+        expectation /= len(tuple)
+        # Variance Square of timestamps in a tuple
+        variance_square = 0
+        for timestamp in tuple.values():
+            variance_square += pow(timestamp - expectation, 2)
+        # Filtering
+        if variance_square >= pow(filter, 2):
+            tuple_list.remove(tuple)
+    return tuple_list
+
+
+
+
+
 if __name__ == "__main__":
-    print SenzCollector(key0=[1,2,3], key1=[1,2,3], key2=[1,2,3], primaryKey="key0")
+    print SenzCollector(filter=1, key0=[2,4,6,9], key1=[3,4,7,9], key2=[1,3,6], primaryKey="key0")
+    # print SenzFilter([{'key2': 1, 'key1': 3, 'key0': 2}, {'key2': 3, 'key1': 4, 'key0': 4}, {'key2': 6, 'key1': 7, 'key0': 6}, {'key2': 6, 'key1': 9, 'key0': 9}], 1)
