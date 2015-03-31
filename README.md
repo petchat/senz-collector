@@ -1,5 +1,5 @@
-SENZ COLLECTOR
-===
+    SENZ COLLECTOR
+    ===
 
     # What can I use this for?
     It used to collect senz tuple from discrete timestamp seqs which include motion, sound, location and so on.
