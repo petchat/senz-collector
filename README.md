@@ -1,9 +1,9 @@
 SENZ COLLECTOR
 ===
 
-# What can I use this for?
+    # What can I use this for?
     It used to collect senz tuple from discrete timestamp seqs which include motion, sound, location and so on.
-        eg. senz tuple look like:
+    eg. senz tuple look like:
         ```
             {
                 "motion":   2015-03-18 05:49:04,
@@ -16,11 +16,11 @@ SENZ COLLECTOR
     The algo will output a list of timestamp group which other key's timestamp is closet to the primary key's timestamp.
     So the timestamp of every item's primary key in the output list is consequent.
 
-# How to use it?
+    # How to use it?
     - Input
-        *time_lines* is a dict, and it can contain more than one timestamp sequences.
-        Every sequence also is a dict, key is the name of time line, and value is a list which contains timestamp seqs.
-        Key can be any word. The selected key will be *primary key* which clustering algo based on.
+    *time_lines* is a dict, and it can contain more than one timestamp sequences.
+    Every sequence also is a dict, key is the name of time line, and value is a list which contains timestamp seqs.
+    Key can be any word. The selected key will be *primary key* which clustering algo based on.
         ```
             {
                 "key 0": [key0_timestamp0, key0_timestamp1, ...],
@@ -31,7 +31,7 @@ SENZ COLLECTOR
             }
         ```
     - Output
-        Return value is a list, the item of return list is a dict which contains N sub-dict( key: key_timestamp ).
+    Return value is a list, the item of return list is a dict which contains N sub-dict( key: key_timestamp ).
         ```
             [
                 {
@@ -45,7 +45,7 @@ SENZ COLLECTOR
             ]
         ```
 
-# Example
+    # Example
     You can invoke this module directly in python.
     ```python
         import senz_collector
