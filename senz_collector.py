@@ -1,6 +1,9 @@
 __author__ = 'woodie'
 
-def SenzCollector(filter=2, **time_lines):
+import sys
+import json
+
+def SenzCollector(input_data):
     '''
     SENZ COLLECTOR
 
@@ -40,14 +43,17 @@ def SenzCollector(filter=2, **time_lines):
                 ...
             ]
     '''
+    filter = 2
+    if input_data.has_key("filter"):
+        filter = input_data.pop("filter")
     # If there is primary key,
     # then get the primary key, and remove the primary key from input.
-    if time_lines.has_key("primaryKey"):
-        primary_key = time_lines.pop("primaryKey")
-        return SenzFilter(ClusteringBaseOnPrimaryKey(primary_key, time_lines), filter)
+    if input_data.has_key("primaryKey"):
+        primary_key = input_data.pop("primaryKey")
+        return SenzFilter(ClusteringBaseOnPrimaryKey(primary_key, input_data), filter)
     # If there is no primary key,
     # then it will clutering decentralized.
-    return SenzFilter(ClusteringDecentralized(time_lines), filter)
+    return SenzFilter(ClusteringDecentralized(input_data), filter)
 
 
 
@@ -96,8 +102,19 @@ def SenzFilter(tuple_list, filter):
 
 
 
-
-
 if __name__ == "__main__":
-    print SenzCollector(filter=1, key0=[2,4,6,9], key1=[3,4,7,9], key2=[1,3,6], primaryKey="key0")
-    # print SenzFilter([{'key2': 1, 'key1': 3, 'key0': 2}, {'key2': 3, 'key1': 4, 'key0': 4}, {'key2': 6, 'key1': 7, 'key0': 6}, {'key2': 6, 'key1': 9, 'key0': 9}], 1)
+
+    if len(sys.argv) >= 2:
+        input_data = json.loads(sys.argv[1])
+        print SenzCollector(input_data)
+    else:
+        print "Input data is needed."
+
+# {"filter":1,"key0":[2,4,6,9],"key1":[3,4,7,9],"key2":[1,3,6],"primaryKey":"key0"}
+# {
+#     "filter": 1,
+#     "key0":   [2, 4, 6, 9],
+#     "key1":   [3, 4, 7, 9],
+#     "key2":   [1, 3, 6],
+#     "primaryKey": "key0"
+# }
