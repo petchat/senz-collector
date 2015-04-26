@@ -68,8 +68,8 @@ def ClusteringBaseOnPrimaryKey(primary_key, time_lines):
             closet_timestamp = 0
             # Compare every timestamp with primary key timestamp in time line.
             for normal_timestamp in time_line:
-                if abs(primary_timestamp - normal_timestamp) < min_delta:
-                    min_delta        = abs(primary_timestamp - normal_timestamp)
+                if abs(int(primary_timestamp['timestamp']) - int(normal_timestamp['timestamp'])) < min_delta:
+                    min_delta        = abs(int(primary_timestamp['timestamp']) - int(normal_timestamp['timestamp']))
                     closet_timestamp = normal_timestamp
                 else:
                     break
@@ -88,15 +88,15 @@ def SenzFilter(tuple_list, filter):
     for tuple in tuple_list:
         # Expectation of timestamps in a tuple
         expectation = 0
-        for timestamp in tuple.values():
-            expectation += timestamp
+        for obj in tuple.values():
+            expectation += obj['timestamp']
         expectation /= len(tuple)
         # Variance Square of timestamps in a tuple
         variance_square = 0
-        for timestamp in tuple.values():
-            variance_square += pow(timestamp - expectation, 2)
+        for obj in tuple.values():
+            variance_square += pow(obj['timestamp'] - expectation, 2)
         # Filtering
-        if variance_square >= pow(filter, 2):
+        if variance_square >= pow(int(filter), 2):
             tuple_list.remove(tuple)
     return tuple_list
 
@@ -104,13 +104,22 @@ def SenzFilter(tuple_list, filter):
 
 if __name__ == "__main__":
 
-    if len(sys.argv) >= 2:
-        input_data = json.loads(sys.argv[1])
-        print SenzCollector(input_data)
-    else:
-        print "Input data is needed."
+    # if len(sys.argv) >= 2:
+    #     input_data = json.loads(sys.argv[1])
+    #     print SenzCollector(input_data)
+    # else:
+    #     print "Input data is needed."
+    data = {
+        "filter": 1,
+        "key0": [{'timestamp': 2}, {'timestamp': 4}, {'timestamp': 6}, {'timestamp': 9}],
+        "key1": [{'timestamp': 3}, {'timestamp': 4}, {'timestamp': 7}, {'timestamp': 9}],
+        "key2": [{'timestamp': 1}, {'timestamp': 3}, {'timestamp': 6}],
+        "primaryKey": "key0"
+    }
 
-# {"filter":1,"key0":[2,4,6,9],"key1":[3,4,7,9],"key2":[1,3,6],"primaryKey":"key0"}
+    print SenzCollector(data)
+
+
 # {
 #     "filter": 1,
 #     "key0":   [2, 4, 6, 9],
