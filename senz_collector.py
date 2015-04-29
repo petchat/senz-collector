@@ -85,20 +85,29 @@ def ClusteringDecentralized(time_lines):
 
 
 def SenzFilter(tuple_list, filter):
+    return_tuple_list = []
+    print 'The tuple list len is:', len(tuple_list)
+    print 'The setting variance is:', pow(int(filter), 2)
     for tuple in tuple_list:
+        print 'Senz Tuple is:\n', tuple
         # Expectation of timestamps in a tuple
         expectation = 0
         for obj in tuple.values():
             expectation += obj['timestamp']
         expectation /= len(tuple)
+        print 'E =', expectation
         # Variance Square of timestamps in a tuple
         variance_square = 0
         for obj in tuple.values():
             variance_square += pow(obj['timestamp'] - expectation, 2)
+        print 'D =', variance_square
         # Filtering
-        if variance_square >= pow(int(filter), 2):
-            tuple_list.remove(tuple)
-    return tuple_list
+        if variance_square < pow(int(filter), 2):
+            # tuple_list.remove(tuple)
+            return_tuple_list.append(tuple)
+        print 'Return Tuple List is:', return_tuple_list
+        print 'The len of it is:', len(return_tuple_list)
+    return return_tuple_list
 
 
 
@@ -118,7 +127,6 @@ if __name__ == "__main__":
     }
 
     print SenzCollector(data)
-
 
 # {
 #     "filter": 1,
