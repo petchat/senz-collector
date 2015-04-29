@@ -64,7 +64,7 @@ def ClusteringBaseOnPrimaryKey(primary_key, time_lines):
         senz_tuple = {primary_key: primary_timestamp}
         # Select the closest timestamp to primary key timestamp in different time line
         for (key, time_line) in time_lines.items():
-            min_delta        = 99999999999
+            min_delta        = 99999999999999
             closet_timestamp = 0
             # Compare every timestamp with primary key timestamp in time line.
             for normal_timestamp in time_line:
