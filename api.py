@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 __author__ = 'woodie'
 
 from flask import Flask, request, url_for, Response, send_file
