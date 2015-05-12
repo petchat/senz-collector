@@ -23,9 +23,11 @@ Every sequence also is a dict, key is the name of time line, and value is a list
 Key can be any word. The selected key will be *primary key* which clustering algo based on.
 ```
 {
-    "key 0": [{"timestamp": key0_timestamp0, ...}, {"timestamp": key0_timestamp1, ...}, ...],
-    "key 1": [{"timestamp": key1_timestamp0, ...}, {"timestamp": key1_timestamp1, ...}, ...],
-    "key 2": [{"timestamp": key2_timestamp0, ...}, {"timestamp": key2_timestamp1, ...}, ...]
+    "timelines": {
+        "key 0": [{"timestamp": key0_timestamp0, ...}, {"timestamp": key0_timestamp1, ...}, ...],
+        "key 1": [{"timestamp": key1_timestamp0, ...}, {"timestamp": key1_timestamp1, ...}, ...],
+        "key 2": [{"timestamp": key2_timestamp0, ...}, {"timestamp": key2_timestamp1, ...}, ...]
+    }
     "filter": setting value
     "primaryKey": "key 0"
 }
