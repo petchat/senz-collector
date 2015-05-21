@@ -25,10 +25,13 @@ def SenzCollector(input_data):
         Every sequence also is a dict, key is the name of time line, and value is a list which contains timestamp seqs.
         Key can be any word. The selected key will be *primary key* which clustering algo based on.
         eg. {
-                "key 0": [key0_timestamp0, key0_timestamp1, ...],
-                "key 1": [key1_timestamp0, key1_timestamp1, ...],
-                "key 2": [key2_timestamp0, key2_timestamp1, ...],
-                ...
+                "filter"
+                "timelines": {
+                    "key 0": [key0_timestamp0, key0_timestamp1, ...],
+                    "key 1": [key1_timestamp0, key1_timestamp1, ...],
+                    "key 2": [key2_timestamp0, key2_timestamp1, ...],
+                    ...
+                }
                 "primaryKey": "key 0"
             }
     :return:
@@ -51,33 +54,50 @@ def SenzCollector(input_data):
     # then get the primary key, and remove the primary key from input.
     if input_data.has_key("primaryKey"):
         primary_key = input_data.pop("primaryKey")
-        return SenzFilter(ClusteringBaseOnPrimaryKey(primary_key, input_data), filter)
+        timelines = SupplyDeficiency(primary_key, input_data)
+        return SenzFilter(ClusteringBaseOnPrimaryKey(primary_key, timelines), filter)
     # If there is no primary key,
     # then it will clutering decentralized.
     return SenzFilter(ClusteringDecentralized(input_data), filter)
 
+def SupplyDeficiency(primary_key, timelines):
+    _timelines = timelines
+    if len(_timelines[primary_key]) <= 0:
+        return None
+    for (key, timeline) in _timelines.items():
+        if key != primary_key and len(timeline) <= 0:
+            # Create counterfeit according to primary key timeline
+            normal_timeline = []
+            for primary_object in _timelines[primary_key]:
+                normal_object = {
+                    "objectId": "counterfeitObjectId",
+                    "userRawdataId": "counterfeitRawdataId",
+                    "timestamp": primary_object["timestamp"]
+                }
+                normal_timeline.append(normal_object)
+            _timelines[key] = normal_timeline
+    return _timelines
 
 
 def ClusteringBaseOnPrimaryKey(primary_key, time_lines):
     result_list = []
     # Scan the primary key list's timestamp one by one.
-    for primary_timestamp in time_lines.pop(primary_key):
-        senz_tuple = {primary_key: primary_timestamp}
+    for primary_object in time_lines.pop(primary_key):
+        senz_tuple = {primary_key: primary_object}
         # Select the closest timestamp to primary key timestamp in different time line
         for (key, time_line) in time_lines.items():
-            min_delta        = 99999999999999
-            closet_timestamp = 0
+            min_delta     = 99999999999999
+            closet_object = {}
             # Compare every timestamp with primary key timestamp in time line.
-            for normal_timestamp in time_line:
-                if abs(int(primary_timestamp['timestamp']) - int(normal_timestamp['timestamp'])) < min_delta:
-                    min_delta        = abs(int(primary_timestamp['timestamp']) - int(normal_timestamp['timestamp']))
-                    closet_timestamp = normal_timestamp
+            for normal_object in time_line:
+                if abs(int(primary_object['timestamp']) - int(normal_object['timestamp'])) < min_delta:
+                    min_delta     = abs(int(primary_object['timestamp']) - int(normal_object['timestamp']))
+                    closet_object = normal_object
                 else:
                     break
-            senz_tuple[key] = closet_timestamp
+            senz_tuple[key] = closet_object
         result_list.append(senz_tuple)
     return result_list
-
 
 
 def ClusteringDecentralized(time_lines):
@@ -106,8 +126,8 @@ def SenzFilter(tuple_list, filter):
         if variance_square < pow(int(filter), 2):
             # tuple_list.remove(tuple)
             return_tuple_list.append(tuple)
-        print 'Return Tuple List is:', return_tuple_list
-        print 'The len of it is:', len(return_tuple_list)
+    print 'Return Tuple List is:', return_tuple_list
+    print 'The len of it is:', len(return_tuple_list)
     return return_tuple_list
 
 
@@ -120,14 +140,23 @@ if __name__ == "__main__":
     # else:
     #     print "Input data is needed."
     data = {
-        "filter": 1,
+        "filter": 100,
         "key0": [{'timestamp': 2}, {'timestamp': 4}, {'timestamp': 6}, {'timestamp': 9}],
         "key1": [{'timestamp': 3}, {'timestamp': 4}, {'timestamp': 7}, {'timestamp': 9}],
-        "key2": [{'timestamp': 1}, {'timestamp': 3}, {'timestamp': 6}],
+        "key2": [],
         "primaryKey": "key0"
     }
 
     print SenzCollector(data)
+
+    # data2 = {
+    #     "key0": [{'timestamp': 2}, {'timestamp': 4}, {'timestamp': 6}, {'timestamp': 9}],
+    #     "key1": [],
+    #     "key2": [{'timestamp': 1}, {'timestamp': 3}, {'timestamp': 6}],
+    #     "key3": [{'timestamp': 1}, {'timestamp': 3}, {'timestamp': 6}]
+    # }
+
+    # print SupplyDeficiency("key0", data2)
 
 # {
 #     "filter": 1,
