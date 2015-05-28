@@ -4,9 +4,7 @@ __author__ = 'woodie'
 from flask import Flask, request, url_for, Response, send_file
 from senz_collector import SenzCollector
 import json
-# import yaml
-# import json
-
+from logger import logger
 
 
 app = Flask(__name__)
@@ -26,9 +24,9 @@ def senzCollectorAPI():
         }
         for (key, timeline) in timelines.items():
             data[key] = timeline
-        print 'Received filter is', filter, ', and primary key is', primaryKey
-        print 'The input data content is'
-        print data
+        logger.info('[API] Received filter is', filter, ', and primary key is', primaryKey)
+        logger.info('[API] The input data content is')
+        logger.info('[API] data: ', data)
         result = json.dumps({'result': SenzCollector(data)})
     return result
 
