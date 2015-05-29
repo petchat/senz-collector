@@ -6,6 +6,7 @@ from unittest import TestCase
 import numpy as np
 
 from flask_app.timesequence_align import _get_sequence_length, _get_time_distribution_params, _get_time_distribution
+from flask_app.timesequence_align import generate_sequences_measures
 
 
 class TestBaseMethod(TestCase):
@@ -26,7 +27,7 @@ class TestBaseMethod(TestCase):
         sequence_list = np.array([[1],
                                   [3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23],
                                   [2, 4, 6, 9]]) 
-        self.assertEqual((3, 6), _get_time_distribution_params(sequence_list))
+        self.assertEqual((3, 7), _get_time_distribution_params(sequence_list))
 
 
     def test_get_time_distribution(self):
@@ -50,4 +51,9 @@ class TestBaseMethod(TestCase):
 
     
     def test_generate_sequences_measures(self):
-        pass
+        # case 1
+        sequence_list = np.array([[1],
+                                  [3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23]]) 
+        measures = np.array([[ 1, 0],
+                             [11, 48]])
+        np.testing.assert_array_equal(measures, generate_sequences_measures(sequence_list))

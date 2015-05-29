@@ -6,6 +6,7 @@ __author__ = 'jiaying.lu'
 __all__ = ['generate_sequences_measures']
 
 from logger import logger
+import numpy as np
 
 TIME_SEG_NUM = 3
 
@@ -37,7 +38,7 @@ def _get_time_distribution_params(sequence_list, time_seg_num=TIME_SEG_NUM):
     for sequence in sequence_list:
         # assert not sequence
         sequences_time_wide.append(sequence[-1]-sequence[0])
-    time_seg_len = max(sequences_time_wide) / time_seg_num
+    time_seg_len = int(round(max(sequences_time_wide) / float(time_seg_num)))
 
     max_sequence_index = sequences_time_wide.index(max(sequences_time_wide))
     time_seg_start = sequence_list[max_sequence_index][0]
@@ -92,3 +93,14 @@ def generate_sequences_measures(sequence_list):
       Measures of m time sequence,
       each time sequence has 2 measures - length, time dis
     """
+    measures = []
+
+    time_seq_start, time_seg_len = _get_time_distribution_params(sequence_list)
+
+    for sequence in sequence_list:
+        sequence_length = _get_sequence_length(sequence)
+        sequence_time_dis = _get_time_distribution(sequence, time_seq_start, time_seg_len)
+        measures.append([sequence_length, sequence_time_dis])
+
+    measures = np.array(measures)
+    return measures
