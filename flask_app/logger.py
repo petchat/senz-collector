@@ -2,7 +2,6 @@
 
 from logentries import LogentriesHandler
 import logging
-import time
 
 __all__ = ['logger']
 

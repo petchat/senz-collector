@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 __author__ = 'woodie'
 
-from flask import Flask, request, url_for, Response, send_file
+from flask import Flask, request
 from senz_collector import SenzCollector
 import json
 from logger import logger
@@ -11,6 +11,7 @@ app = Flask(__name__)
 
 @app.route('/', methods=['POST'])
 def senzCollectorAPI():
+    # TODO: apply new strategy
     result = 'Your request is illegal'
     if request.method == 'POST':
         incoming_data = json.loads(request.data)
