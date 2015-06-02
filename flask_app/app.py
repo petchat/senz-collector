@@ -6,6 +6,7 @@ from senz_collector import SenzCollector
 import json
 from logger import logger
 
+logger.info("[log.rawsenz] Start...")
 
 app = Flask(__name__)
 
