@@ -6,10 +6,11 @@ from unittest import TestCase
 import numpy as np
 
 from flask_app.timesequence_align import _get_sequence_length, _get_sequence_time_length, _get_time_distribution_params, _get_time_distribution
+from flask_app.timesequence_align import _find_nearest_node, _generate_senz_collected
 from flask_app.timesequence_align import generate_sequences_measures, choose_primary_key
 
 
-class TestInnerMethod(TestCase):
+class TestMeasuresMethod(TestCase):
 
     def test_get_sequence_length(self):
         # case 1
@@ -60,6 +61,44 @@ class TestInnerMethod(TestCase):
         # case 5
         sequence = np.array([1, 2, 3, 4, 5, 6, 7])
         self.assertEqual(8, _get_time_distribution(sequence, 1, 2))
+
+
+class TestCollectMethod(TestCase):
+
+    def test_find_nearest_node(self):
+        # case 1
+        primary_node = 3
+        node_list = [1, 2, 6, 9]
+        self.assertEqual(2, _find_nearest_node(primary_node, node_list))
+
+        # case 2
+        primary_node = 3
+        node_list = np.array([1, 2, 6, 9])
+        self.assertEqual(2, _find_nearest_node(primary_node, node_list))
+
+        # case 3
+        primary_node = 12
+        node_list = np.array([1, 3, 5, 7, 9, 11])
+        self.assertEqual(11, _find_nearest_node(primary_node, node_list))
+
+    def test_generate_senz_collected(self):
+        # case 1
+        primary_sequence = {'PK': np.array([1, 3, 5, 7, 9])}
+        secondary_sequence = {'SK': np.array([1, 4, 5, 8, 9]), 'HK': np.array([2, 5])}
+        result = [{'SK': {'timestamp': 1}, 'PK': {'timestamp': 1}, 'HK': {'timestamp': 2}},
+                  {'SK': {'timestamp': 4}, 'PK': {'timestamp': 3}, 'HK': {'timestamp': 2}},
+                  {'SK': {'timestamp': 5}, 'PK': {'timestamp': 5}, 'HK': {'timestamp': 5}},
+                  {'SK': {'timestamp': 8}, 'PK': {'timestamp': 7}, 'HK': {'timestamp': 7, 'objectId': 'counterfeitObjectId', 'userRawdataId': 'counterfeitRawdataId'}},
+                  {'SK': {'timestamp': 9}, 'PK': {'timestamp': 9}, 'HK': {'timestamp': 9, 'objectId': 'counterfeitObjectId', 'userRawdataId': 'counterfeitRawdataId'}}]
+        self.assertEqual(result, _generate_senz_collected(primary_sequence, secondary_sequence, 1))
+
+        # case 2
+        primary_sequence = {'PK': np.array([1, 3, 5])}
+        secondary_sequence = {'SK': []}
+        result = [{'SK': {'timestamp': 1, 'objectId': 'counterfeitObjectId', 'userRawdataId': 'counterfeitRawdataId'}, 'PK': {'timestamp': 1}},
+                  {'SK': {'timestamp': 3, 'objectId': 'counterfeitObjectId', 'userRawdataId': 'counterfeitRawdataId'}, 'PK': {'timestamp': 3}},
+                  {'SK': {'timestamp': 5, 'objectId': 'counterfeitObjectId', 'userRawdataId': 'counterfeitRawdataId'}, 'PK': {'timestamp': 5}}]
+        self.assertEqual(result, _generate_senz_collected(primary_sequence, secondary_sequence, 1))
 
 
 class TestInterfaceMethod(TestCase):

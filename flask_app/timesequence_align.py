@@ -116,21 +116,21 @@ def generate_sequences_measures(sequence_list):
 
 
 def choose_primary_key(data):
-    """Return primary key of input data, and change data['primaryKey']
+    """Return primary key of input data
 
     Primary key has best measures.
 
     Parameters
     ----------
     data: dict, {'filter':, 'primaryKey':, 'key0':, ...}
-    raw log data from API request
+      raw log data from API request
 
     Returns
     -------
     primary_key: string, must be one key of data
-    primary_key during to best measures
+      primary_key during to best measures
     """
-    data_shallow = data.copy()
+    data_shallow = data.copy()  # Use data.copy to avoid change data's attributes
     data_shallow.pop('filter')
     data_shallow.pop('primaryKey')
 
@@ -155,7 +155,121 @@ def choose_primary_key(data):
 
     # get primary key
     primary_key = sequence_list_keys[measures_reduced.index(best_measure)]
-    data['primaryKey'] = primary_key  # will change input param
+    # data['primaryKey'] = primary_key  # will change input param
 
     return primary_key
 
+
+def _find_nearest_node(primary_node, node_list):
+    """Find the most nearest node in node_list with primary_timestamp
+
+    Parameters
+    ----------
+    primary_node: timestamp
+    node_list: array_like, shape(1, n)
+      assert len(node_list) > 0
+      elems in node_list are pure timestamp
+
+    Returns
+    -------
+    nearest_node: timestamp
+    timestamp in node_list
+    """
+    # TODO: 测试效率, use timeit
+    sorted_list = list(node_list)
+    sorted_list.append(primary_node)
+    sorted_list.sort()
+    index = sorted_list.index(primary_node)
+
+    if index == 0:
+        return sorted_list[index+1]
+    if index == len(sorted_list) - 1:
+        return sorted_list[index-1]
+
+    return sorted_list[index-1] if abs(sorted_list[index-1]-primary_node) <= abs(sorted_list[index+1]-primary_node) else sorted_list[index+1]
+
+
+def _generate_senz_collected(primary_sequence, secondary_sequences, var_filter):
+    """Generate pure integer result of senz lists
+
+    Parameters
+    ---------
+    primary_sequence: dict
+      value is array_like, pure integer(timestamp)
+    secondary_sequences: dict
+      values are array_like, pure integer(timestamp)
+    var_filter: float
+      secondary sequences' elem variance should less than var_filter
+
+    Returns
+    -------
+    senz_collected: list,
+      [{key0: , key1: , key2:}, {}, {}]
+      elem of senz_collected is a senz tuple
+    -------
+    """
+    senz_collected = []
+    for primary_key, primary_value in primary_sequence.iteritems():
+        for node in primary_value:
+            senz_collected_elem = {}
+            senz_collected_elem[primary_key] = {'timestamp': node}
+            for secondary_key, secondary_value in secondary_sequences.iteritems():
+                # handle empty case
+                if len(secondary_value) < 1:
+                    nearest_node = {
+                        "objectId": "counterfeitObjectId",
+                        "userRawdataId": "counterfeitRawdataId",
+                        "timestamp": node
+                    }
+                    senz_collected_elem[secondary_key] = nearest_node
+                    continue
+
+                nearest_node = {'timestamp': _find_nearest_node(node, secondary_value)}
+                if (node - nearest_node['timestamp']) ** 2 > var_filter:
+                    nearest_node = {
+                        "objectId": "counterfeitObjectId",
+                        "userRawdataId": "counterfeitRawdataId",
+                        "timestamp": node
+                    }
+                senz_collected_elem[secondary_key] = nearest_node
+
+            senz_collected.append(senz_collected_elem)
+
+    return senz_collected
+
+
+def collect_senz_lists(data):
+    """Collect senz lists according to primary_key
+
+    Wrapper of _generate_senz_collected, additional add some preprocess.
+
+    Parameters
+    ----------
+    data: dict, {'filter':, 'primaryKey':, 'key0':, ...}
+      raw log data from API request
+
+    Returns
+    -------
+    senz_collected: list, [{}, {}, {}]
+      elem of senz_collected is a senz tuple
+    """
+    # Step 1: choose data's primary key
+    primary_key = choose_primary_key(data)
+    logger.info('[Choose PK] primary_key: %s' % (primary_key))
+
+    # Step 2: generate senz_collected
+    primary_sequence = {primary_key: [primary_key]}
+    secondary_sequences = {}
+    for key in data:
+        if key not in [primary_key, 'primaryKey', 'filter']:
+            secondary_sequences[key] = data[key]
+
+    # process sequences
+    for key, value in primary_sequence.iteritems():
+        value = [elem['timestamp'] for elem in value]
+        primary_sequence[key] = np.array(value)
+    for key, value in secondary_sequences.iteritems():
+        value = [elem['timestamp'] for elem in value]
+        secondary_sequences[key] = np.array(value)
+
+    return _generate_senz_collected(primary_sequence, secondary_sequences, data['filter'])
