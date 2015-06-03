@@ -3,7 +3,7 @@
 """Align time sequences by length and time distribution"""
 
 __author__ = 'jiaying.lu'
-__all__ = ['generate_sequences_measures']
+__all__ = ['generate_sequences_measures', 'collect_senz_lists', 'choose_primary_key']
 
 from logger import logger
 import numpy as np
@@ -115,14 +115,14 @@ def generate_sequences_measures(sequence_list):
     return measures
 
 
-def choose_primary_key(data):
+def choose_primary_key(timelines):
     """Return primary key of input data
 
     Primary key has best measures.
 
     Parameters
     ----------
-    data: dict, {'filter':, 'primaryKey':, 'key0':, ...}
+    timelines: dict, {'key0':, 'key1:, 'key2':, ...}
       raw log data from API request
 
     Returns
@@ -130,13 +130,11 @@ def choose_primary_key(data):
     primary_key: string, must be one key of data
       primary_key during to best measures
     """
-    data_shallow = data.copy()  # Use data.copy to avoid change data's attributes
-    data_shallow.pop('filter')
-    data_shallow.pop('primaryKey')
+    data_shallow = timelines.copy()  # Use data.copy to avoid change data's attributes
 
     # filter empty list of data
-    sequence_list_keys = filter(lambda e: data_shallow[e], data_shallow.keys())
-    sequence_list_values = filter(lambda e: e, data_shallow.values())
+    sequence_list_keys = filter(lambda e: len(data_shallow[e]) > 0, data_shallow.keys())
+    sequence_list_values = filter(lambda e: len(e) > 0, data_shallow.values())
 
     # generate measures
     sequence_list = []
@@ -245,7 +243,7 @@ def collect_senz_lists(data):
 
     Parameters
     ----------
-    data: dict, {'filter':, 'primaryKey':, 'key0':, ...}
+    data: dict, {'filter':, 'primaryKey':, 'timelines':{'key0':, 'key1':, ...}}
       raw log data from API request
 
     Returns
@@ -254,15 +252,15 @@ def collect_senz_lists(data):
       elem of senz_collected is a senz tuple
     """
     # Step 1: choose data's primary key
-    primary_key = choose_primary_key(data)
+    primary_key = choose_primary_key(data['timelines'])
     logger.info('[Choose PK] primary_key: %s' % (primary_key))
 
     # Step 2: generate senz_collected
-    primary_sequence = {primary_key: [primary_key]}
+    primary_sequence = {primary_key: data['timelines'][primary_key]}
     secondary_sequences = {}
-    for key in data:
-        if key not in [primary_key, 'primaryKey', 'filter']:
-            secondary_sequences[key] = data[key]
+    for key in data['timelines']:
+        if key != primary_key:
+            secondary_sequences[key] = data['timelines'][key]
 
     # process sequences
     for key, value in primary_sequence.iteritems():

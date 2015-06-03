@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+"""Unit test for timesequence_align"""
+
 __author__ = 'jiaying.lu'
 
 from unittest import TestCase
@@ -7,7 +9,7 @@ import numpy as np
 
 from flask_app.timesequence_align import _get_sequence_length, _get_sequence_time_length, _get_time_distribution_params, _get_time_distribution
 from flask_app.timesequence_align import _find_nearest_node, _generate_senz_collected
-from flask_app.timesequence_align import generate_sequences_measures, choose_primary_key
+from flask_app.timesequence_align import generate_sequences_measures, choose_primary_key, collect_senz_lists
 
 
 class TestMeasuresMethod(TestCase):
@@ -83,10 +85,10 @@ class TestCollectMethod(TestCase):
 
     def test_generate_senz_collected(self):
         # case 1
-        primary_sequence = {'PK': np.array([1, 3, 5, 7, 9])}
-        secondary_sequence = {'SK': np.array([1, 4, 5, 8, 9]), 'HK': np.array([2, 5])}
-        result = [{'SK': {'timestamp': 1}, 'PK': {'timestamp': 1}, 'HK': {'timestamp': 2}},
-                  {'SK': {'timestamp': 4}, 'PK': {'timestamp': 3}, 'HK': {'timestamp': 2}},
+        primary_sequence = {'PK': np.array([1, 4, 5, 7, 9])}
+        secondary_sequence = {'SK': np.array([3, 5, 8, 9]), 'HK': np.array([2, 5])}
+        result = [{'SK': {'timestamp': 1, 'objectId': 'counterfeitObjectId', 'userRawdataId': 'counterfeitRawdataId'}, 'PK': {'timestamp': 1}, 'HK': {'timestamp': 2}},
+                  {'SK': {'timestamp': 3}, 'PK': {'timestamp': 4}, 'HK': {'timestamp': 5}},
                   {'SK': {'timestamp': 5}, 'PK': {'timestamp': 5}, 'HK': {'timestamp': 5}},
                   {'SK': {'timestamp': 8}, 'PK': {'timestamp': 7}, 'HK': {'timestamp': 7, 'objectId': 'counterfeitObjectId', 'userRawdataId': 'counterfeitRawdataId'}},
                   {'SK': {'timestamp': 9}, 'PK': {'timestamp': 9}, 'HK': {'timestamp': 9, 'objectId': 'counterfeitObjectId', 'userRawdataId': 'counterfeitRawdataId'}}]
@@ -123,11 +125,41 @@ class TestInterfaceMethod(TestCase):
 
     def test_choose_primary_key(self):
         # TODO: add more cases
-        data = {
-            "filter": 100,
+        timelines = {
             "key0": [{'timestamp': 2}, {'timestamp': 4}, {'timestamp': 6}, {'timestamp': 9}],
             "key1": [{'timestamp': 3}, {'timestamp': 4}, {'timestamp': 7}, {'timestamp': 9}],
             "key2": [],
-            "primaryKey": "key2"
         }
-        self.assertEqual('key0', choose_primary_key(data))
+        self.assertEqual('key0', choose_primary_key(timelines))
+
+    def test_collect_senz_lists(self):
+        # case 1
+        data = {
+            'primary_key': 'HK',
+            'filter': 1,
+            'timelines': {
+                'PK': [{'timestamp': 1}, {'timestamp': 4}, {'timestamp': 5}, {'timestamp': 7}, {'timestamp': 9}],
+                'SK': [{'timestamp': 3}, {'timestamp': 5}, {'timestamp': 8}, {'timestamp': 9}],
+                'HK': [{'timestamp': 2}, {'timestamp': 5}]
+            }
+        }
+        result = [{'SK': {'timestamp': 1, 'objectId': 'counterfeitObjectId', 'userRawdataId': 'counterfeitRawdataId'}, 'PK': {'timestamp': 1}, 'HK': {'timestamp': 2}},
+                  {'SK': {'timestamp': 3}, 'PK': {'timestamp': 4}, 'HK': {'timestamp': 5}},
+                  {'SK': {'timestamp': 5}, 'PK': {'timestamp': 5}, 'HK': {'timestamp': 5}},
+                  {'SK': {'timestamp': 8}, 'PK': {'timestamp': 7}, 'HK': {'timestamp': 7, 'objectId': 'counterfeitObjectId', 'userRawdataId': 'counterfeitRawdataId'}},
+                  {'SK': {'timestamp': 9}, 'PK': {'timestamp': 9}, 'HK': {'timestamp': 9, 'objectId': 'counterfeitObjectId', 'userRawdataId': 'counterfeitRawdataId'}}]
+        self.assertEqual(result, collect_senz_lists(data))
+
+        # case 2
+        data = {
+            'primary_key': 'HK',
+            'filter': 1,
+            'timelines': {
+                'PK': [{'timestamp': 1}, {'timestamp': 3}, {'timestamp': 5}],
+                'SK': []
+            }
+        }
+        result = [{'SK': {'timestamp': 1, 'objectId': 'counterfeitObjectId', 'userRawdataId': 'counterfeitRawdataId'}, 'PK': {'timestamp': 1}},
+                  {'SK': {'timestamp': 3, 'objectId': 'counterfeitObjectId', 'userRawdataId': 'counterfeitRawdataId'}, 'PK': {'timestamp': 3}},
+                  {'SK': {'timestamp': 5, 'objectId': 'counterfeitObjectId', 'userRawdataId': 'counterfeitRawdataId'}, 'PK': {'timestamp': 5}}]
+        self.assertEqual(result, collect_senz_lists(data))
