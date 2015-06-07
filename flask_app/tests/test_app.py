@@ -32,6 +32,7 @@ class TestSenzCollectorAPI(TestCase):
         self.assertEqual(1, result['code'])
 
     def test_valid_params(self):
+        # case 1
         data = {
             'primary_key': 'HK',
             'filter': 1,
@@ -52,3 +53,16 @@ class TestSenzCollectorAPI(TestCase):
             {'SK': {'timestamp': 5, 'objectId': 'counterfeitObjectId', 'userRawdataId': 'counterfeitRawdataId'},
              'PK': {'timestamp': 5}}]
         self.assertEqual(senz_collected, result['result'])
+
+        # case 2
+        data = {
+            'primary_key': 'HK',
+            'filter': 1,
+            'timelines': {
+                'PK': [{'timestamp': 1}, {'timestamp': 3}, {'timestamp': 5}],
+                'SK': [1, {'test': 2}, 'error_key']
+            }
+        }
+        rv = self.app.post('/', data=json.dumps(data))
+        result = json.loads(rv.data)
+        self.assertEqual(0, result['code'])
