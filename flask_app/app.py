@@ -52,7 +52,7 @@ def senzCollectorAPI():
         result['message'] = 'success'
     except Exception, e:
         logger.error('[Exception] generate result error: %s' % (str(e)))
-        result['code'] = 0
+        result['code'] = 1
         result['message'] = '500 Internal Error'
         return json.dumps(result)
 
