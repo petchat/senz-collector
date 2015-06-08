@@ -27,7 +27,7 @@ def init_rollbar():
     got_request_exception.connect(rollbar.contrib.flask.report_exception, app)
 
 
-@app.route('/', methods=['POST', 'GET'])
+@app.route('/', methods=['POST'])
 def senzCollectorAPI():
     result = {'code': 1, 'message': ''}
 
