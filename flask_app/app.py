@@ -35,29 +35,27 @@ def senzCollectorAPI():
     try:
         incoming_data = json.loads(request.data)
     except ValueError, err_msg:
-        logger.error('[ValueError] err_msg: %s, params=%s' % (err_msg, request.data))
+        logger.exception('[ValueError] err_msg: %s, params=%s' % (err_msg, request.data))
         result['message'] = 'Unvalid params: NOT a JSON Object'
         return json.dumps(result)
 
     # params key checking
     for key in ['filter', 'timelines']:
         if key not in incoming_data:
-            logger.error("[KeyError] params=%s, should have key: %s" % (incoming_data, key))
+            logger.exception("[KeyError] params=%s, should have key: %s" % (incoming_data, key))
             result['message'] = "Params content Error: cant't find key=%s" % (key)
             return json.dumps(result)
+
+    logger.info('[log.rawsenz] valid request with params=%s' %(incoming_data))
 
     try:
         result['result'] = collect_senz_lists(incoming_data)
         result['code'] = 0
         result['message'] = 'success'
     except Exception, e:
-        logger.error('[Exception] generate result error: %s' % (str(e)))
+        logger.exception('[Exception] generate result error: %s' % (str(e)))
         result['code'] = 1
         result['message'] = '500 Internal Error'
         return json.dumps(result)
 
     return json.dumps(result)
-
-if __name__ == '__main__':
-    app.debug = True
-    app.run(port=9009)
