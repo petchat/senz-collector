@@ -19,8 +19,8 @@ app = Flask(__name__)
 @app.before_first_request
 def init_rollbar():
     """init rollbar module"""
-    rollbar.init('6b773c84e86041798a513ba8ef73bb74',
-                 'petchat-flask',
+    rollbar.init('4b6aba13553f44ba87bef96c176c6208',
+                 'dev',
                  root=os.path.dirname(os.path.realpath(__file__)),
                  allow_logging_basic_config=False)
 
