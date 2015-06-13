@@ -8,6 +8,8 @@ env:
 install:
     - sudo apt-get update
     - sudo apt-get -y install python-pip
+    - pwd
+    - ls
     - sudo pip install -r ./flask_app/requirements.txt
 
 before_script:
