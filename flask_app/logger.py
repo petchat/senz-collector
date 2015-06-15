@@ -7,7 +7,7 @@ __all__ = ['logger']
 
 logger = logging.getLogger('rollbar')
 logger.setLevel(logging.INFO)
-LOGENTRIES_TOKEN = '184e19de-3291-447b-baa2-e36b50f75592'
+LOGENTRIES_TOKEN = '6780de1b-f4c2-47ad-9698-146d583833d6'
 logentries_handler = LogentriesHandler(LOGENTRIES_TOKEN)
 
 logger.addHandler(logentries_handler)
