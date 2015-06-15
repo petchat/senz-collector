@@ -10,6 +10,7 @@ import rollbar
 import rollbar.contrib.flask
 
 from timesequence_align import collect_senz_lists
+from config import *
 
 logger.info("[log.rawsenz] Start...")
 
@@ -18,13 +19,26 @@ app = Flask(__name__)
 
 @app.before_first_request
 def init_rollbar():
+    import datetime
+
+    init_tag = "[Initiation of Service Process]\n"
+
     """init rollbar module"""
-    rollbar.init('4b6aba13553f44ba87bef96c176c6208',
-                 'dev',
+    rollbar.init(ROLLBAR_TOKEN,
+                 APP_ENV,
                  root=os.path.dirname(os.path.realpath(__file__)),
                  allow_logging_basic_config=False)
 
     got_request_exception.connect(rollbar.contrib.flask.report_exception, app)
+
+    log_init_time = "Initiation START at: \t%s\n" % datetime.datetime.now()
+    log_app_env = "Environment Variable: \t%s\n" % APP_ENV
+    log_rollbar_token = "Rollbar Service TOKEN: \t%s\n" % ROLLBAR_TOKEN
+    log_logentries_token = "Logentries Service TOKEN: \t%s\n" % LOGENTRIES_TOKEN
+    logger.info(init_tag + log_init_time)
+    logger.info(init_tag + log_app_env)
+    logger.info(init_tag + log_rollbar_token)
+    logger.info(init_tag + log_logentries_token)
 
 
 @app.route('/', methods=['POST'])
