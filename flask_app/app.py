@@ -20,10 +20,11 @@ app = Flask(__name__)
 
 
 @app.before_first_request
-def init_rollbar():
+def init_before_first_request():
     import datetime
 
     init_tag = "[Initiation of Service Process]\n"
+    logger.info('[init] enter init before_first_request')
 
     # Configure Bugsnag
     bugsnag.configure(
@@ -45,6 +46,7 @@ def init_rollbar():
 
 @app.route('/', methods=['POST'])
 def senzCollectorAPI():
+    logger.info('[API] enter API')
     result = {'code': 1, 'message': ''}
 
     # params JSON validate
