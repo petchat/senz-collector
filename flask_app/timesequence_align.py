@@ -173,7 +173,6 @@ def _find_nearest_node(primary_node, node_list):
     nearest_node: timestamp
     timestamp in node_list
     """
-    # TODO: 测试效率, use timeit
     sorted_list = list(node_list)
     sorted_list.append(primary_node)
     sorted_list.sort()
