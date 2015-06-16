@@ -6,7 +6,7 @@ import logging
 
 __all__ = ['logger']
 
-logger = logging.getLogger('rollbar')
+logger = logging.getLogger('logentries')
 logger.setLevel(logging.INFO)
 logentries_handler = LogentriesHandler(LOGENTRIES_TOKEN)
 

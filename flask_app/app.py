@@ -6,11 +6,13 @@ from flask import Flask, request, got_request_exception
 import json
 import os
 from logger import logger
-import rollbar
-import rollbar.contrib.flask
 
 from timesequence_align import collect_senz_lists
 from config import *
+
+import bugsnag
+from bugsnag.flask import handle_exceptions
+
 
 logger.info("[log.rawsenz] Start...")
 
@@ -23,21 +25,21 @@ def init_rollbar():
 
     init_tag = "[Initiation of Service Process]\n"
 
-    """init rollbar module"""
-    rollbar.init(ROLLBAR_TOKEN,
-                 APP_ENV,
-                 root=os.path.dirname(os.path.realpath(__file__)),
-                 allow_logging_basic_config=False)
-
-    got_request_exception.connect(rollbar.contrib.flask.report_exception, app)
+    # Configure Bugsnag
+    bugsnag.configure(
+        api_key=BUGSNAG_TOKEN,
+        project_root=os.path.dirname(os.path.realpath(__file__)),
+    )
+    # Attach Bugsnag to Flask's exception handler
+    handle_exceptions(app)
 
     log_init_time = "Initiation START at: \t%s\n" % datetime.datetime.now()
     log_app_env = "Environment Variable: \t%s\n" % APP_ENV
-    log_rollbar_token = "Rollbar Service TOKEN: \t%s\n" % ROLLBAR_TOKEN
+    log_bugsnag_token = "Bugsnag Service TOKEN: \t%s\n" % BUGSNAG_TOKEN
     log_logentries_token = "Logentries Service TOKEN: \t%s\n" % LOGENTRIES_TOKEN
     logger.info(init_tag + log_init_time)
     logger.info(init_tag + log_app_env)
-    logger.info(init_tag + log_rollbar_token)
+    logger.info(init_tag + log_bugsnag_token)
     logger.info(init_tag + log_logentries_token)
 
 
@@ -73,3 +75,8 @@ def senzCollectorAPI():
         return json.dumps(result)
 
     return json.dumps(result)
+
+
+if __name__ == '__main__':
+    app.debug = True
+    app.run(host="0.0.0.0", port=9010)

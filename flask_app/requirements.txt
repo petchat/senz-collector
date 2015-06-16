@@ -1,5 +1,5 @@
 flask
 blinker
 logentries
-rollbar
+bugsnag
 numpy
