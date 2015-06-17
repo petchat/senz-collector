@@ -14,7 +14,7 @@ import bugsnag
 from bugsnag.flask import handle_exceptions
 
 
-logger.info("[log.rawsenz] Start...")
+# logger.info("[log.rawsenz] Start...")
 
 # Configure Bugsnag
 bugsnag.configure(
