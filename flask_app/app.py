@@ -19,6 +19,7 @@ logger.info("[log.rawsenz] Start...")
 app = Flask(__name__)
 
 
+'''
 @app.before_first_request
 def init_before_first_request():
     import datetime
@@ -42,6 +43,7 @@ def init_before_first_request():
     logger.info(init_tag + log_app_env)
     logger.info(init_tag + log_bugsnag_token)
     logger.info(init_tag + log_logentries_token)
+'''
 
 
 @app.route('/', methods=['POST'])
