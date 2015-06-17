@@ -16,10 +16,15 @@ from bugsnag.flask import handle_exceptions
 
 logger.info("[log.rawsenz] Start...")
 
+# Configure Bugsnag
+bugsnag.configure(
+    api_key=BUGSNAG_TOKEN,
+    project_root=os.path.dirname(os.path.realpath(__file__)),
+)
+
 app = Flask(__name__)
 
 
-'''
 @app.before_first_request
 def init_before_first_request():
     import datetime
@@ -27,11 +32,6 @@ def init_before_first_request():
     init_tag = "[Initiation of Service Process]\n"
     logger.info('[init] enter init before_first_request')
 
-    # Configure Bugsnag
-    bugsnag.configure(
-        api_key=BUGSNAG_TOKEN,
-        project_root=os.path.dirname(os.path.realpath(__file__)),
-    )
     # Attach Bugsnag to Flask's exception handler
     handle_exceptions(app)
 
@@ -43,7 +43,6 @@ def init_before_first_request():
     logger.info(init_tag + log_app_env)
     logger.info(init_tag + log_bugsnag_token)
     logger.info(init_tag + log_logentries_token)
-'''
 
 
 @app.route('/', methods=['POST'])
