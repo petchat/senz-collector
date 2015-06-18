@@ -29,6 +29,9 @@ bugsnag.configure(
 
 app = Flask(__name__)
 
+# Attach Bugsnag to Flask's exception handler
+handle_exceptions(app)
+
 
 @app.before_first_request
 def init_before_first_request():
@@ -36,9 +39,6 @@ def init_before_first_request():
 
     init_tag = "[Initiation of Service Process]\n"
     logger.info('[init] enter init before_first_request')
-
-    # Attach Bugsnag to Flask's exception handler
-    handle_exceptions(app)
 
     log_init_time = "Initiation START at: \t%s\n" % datetime.datetime.now()
     log_app_env = "Environment Variable: \t%s\n" % APP_ENV
