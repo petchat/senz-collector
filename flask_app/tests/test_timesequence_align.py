@@ -114,7 +114,6 @@ class TestInterfaceMethod(TestCase):
         np.testing.assert_array_equal(measures, generate_sequences_measures(sequence_list))
 
         # case 2
-        # TODO: 这其实是一个 badcase，算第三行的 time_dis measure 不是从1开始算，而是从3开始算 [3,10),[10,17),[17,24)
         sequence_list = np.array([[1],
                                   [3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23],
                                   [1, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]])
@@ -124,7 +123,6 @@ class TestInterfaceMethod(TestCase):
         np.testing.assert_array_equal(measures, generate_sequences_measures(sequence_list))
 
     def test_choose_primary_key(self):
-        # TODO: add more cases
         timelines = {
             "key0": [{'timestamp': 2}, {'timestamp': 4}, {'timestamp': 6}, {'timestamp': 9}],
             "key1": [{'timestamp': 3}, {'timestamp': 4}, {'timestamp': 7}, {'timestamp': 9}],

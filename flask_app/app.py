@@ -5,7 +5,6 @@ from flask import Flask, request, got_request_exception
 # from senz_collector import SenzCollector
 import json
 import os
-from logger import logger
 
 from timesequence_align import collect_senz_lists
 from config import *
@@ -13,8 +12,14 @@ from config import *
 import bugsnag
 from bugsnag.flask import handle_exceptions
 
+from logentries import LogentriesHandler
+import logging
 
-# logger.info("[log.rawsenz] Start...")
+# Configure Logentries
+logger = logging.getLogger('logentries')
+logger.setLevel(logging.INFO)
+logentries_handler = LogentriesHandler(LOGENTRIES_TOKEN)
+logger.addHandler(logentries_handler)
 
 # Configure Bugsnag
 bugsnag.configure(
