@@ -5,9 +5,10 @@
 __author__ = 'jiaying.lu'
 __all__ = ['generate_sequences_measures', 'collect_senz_lists', 'choose_primary_key']
 
-from logger import logger
+import logging
 import numpy as np
 
+logger = logging.getLogger('logentries.timesequence_align')
 TIME_SEG_NUM = 3
 
 
@@ -173,7 +174,6 @@ def _find_nearest_node(primary_node, node_list):
     nearest_node: timestamp
     timestamp in node_list
     """
-    # TODO: 测试效率, use timeit
     sorted_list = list(node_list)
     sorted_list.append(primary_node)
     sorted_list.sort()
