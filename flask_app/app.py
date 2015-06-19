@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 __author__ = 'woodie'
 
-from flask import Flask, request, got_request_exception
+from flask import Flask, request
 # from senz_collector import SenzCollector
 import json
 import os
@@ -17,7 +17,7 @@ import logging
 
 # Configure Logentries
 logger = logging.getLogger('logentries')
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 logentries_handler = LogentriesHandler(LOGENTRIES_TOKEN)
 logger.addHandler(logentries_handler)
 
@@ -52,7 +52,16 @@ def init_before_first_request():
 
 @app.route('/', methods=['POST'])
 def senzCollectorAPI():
-    logger.info('[API] enter API')
+    logger = logging.getLogger('logentries.X-Request-Id')
+    if request.headers.has_key('X-Request-Id') and request.headers['X-Request-Id']:
+        print('has key and')
+        logger.setLevel(logging.DEBUG)
+        logentries_handler = LogentriesHandler(LOGENTRIES_TOKEN)
+        formatter = logging.Formatter('%(asctime)s : %(levelname)s, ' + request.headers['X-Request-Id'] + ', %(message)s')
+        logentries_handler.setFormatter(formatter)
+        logger.addHandler(logentries_handler)
+
+    logger.info('[senzCollector API] enter API')
     result = {'code': 1, 'message': ''}
 
     # params JSON validate
