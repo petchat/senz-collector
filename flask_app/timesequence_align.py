@@ -8,7 +8,7 @@ __all__ = ['generate_sequences_measures', 'collect_senz_lists', 'choose_primary_
 import logging
 import numpy as np
 
-logger = logging.getLogger('logentries.X-Request-Id')
+logger = logging.getLogger('logentries')
 TIME_SEG_NUM = 3
 
 

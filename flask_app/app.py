@@ -52,14 +52,10 @@ def init_before_first_request():
 
 @app.route('/', methods=['POST'])
 def senzCollectorAPI():
-    logger = logging.getLogger('logentries.X-Request-Id')
     if request.headers.has_key('X-Request-Id') and request.headers['X-Request-Id']:
-        print('has key and')
-        logger.setLevel(logging.DEBUG)
-        logentries_handler = LogentriesHandler(LOGENTRIES_TOKEN)
-        formatter = logging.Formatter('%(asctime)s : %(levelname)s, ' + request.headers['X-Request-Id'] + ', %(message)s')
-        logentries_handler.setFormatter(formatter)
-        logger.addHandler(logentries_handler)
+        x_request_id = request.headers['X-Request-Id']
+    else:
+        x_request_id = ''
 
     logger.info('[senzCollector API] enter API')
     result = {'code': 1, 'message': ''}
@@ -68,25 +64,25 @@ def senzCollectorAPI():
     try:
         incoming_data = json.loads(request.data)
     except ValueError, err_msg:
-        logger.exception('[ValueError] err_msg: %s, params=%s' % (err_msg, request.data))
+        logger.exception('%s, [ValueError] err_msg: %s, params=%s' % (x_request_id, err_msg, request.data))
         result['message'] = 'Unvalid params: NOT a JSON Object'
         return json.dumps(result)
 
     # params key checking
     for key in ['filter', 'timelines']:
         if key not in incoming_data:
-            logger.exception("[KeyError] params=%s, should have key: %s" % (incoming_data, key))
+            logger.exception("%s, [KeyError] params=%s, should have key: %s" % (x_request_id, incoming_data, key))
             result['message'] = "Params content Error: cant't find key=%s" % (key)
             return json.dumps(result)
 
-    logger.info('[log.rawsenz] valid request with params=%s' %(incoming_data))
+    logger.info('%s, [log.rawsenz] valid request with params=%s' %(x_request_id, incoming_data))
 
     try:
         result['result'] = collect_senz_lists(incoming_data)
         result['code'] = 0
         result['message'] = 'success'
     except Exception, e:
-        logger.exception('[Exception] generate result error: %s' % (str(e)))
+        logger.exception('%s, [Exception] generate result error: %s' % (x_request_id, str(e)))
         result['code'] = 1
         result['message'] = '500 Internal Error'
         return json.dumps(result)
