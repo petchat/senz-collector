@@ -48,11 +48,11 @@ class TestSenzCollectorAPI(TestCase):
     def test_valid_params(self):
         # case 1
         data = {
-            'primary_key': 'HK',
-            'filter': 1,
-            'timelines': {
-                'PK': [{'timestamp': 1}, {'timestamp': 3}, {'timestamp': 5}],
-                'SK': []
+            "primary_key": "HK",
+            "filter": 1,
+            "timelines": {
+                "PK": [{"timestamp": 1}, {"timestamp": 3}, {"timestamp": 5}],
+                "SK": []
             }
         }
         rv = self.app.post('/', data=json.dumps(data))
