@@ -67,3 +67,21 @@ class TestSenzCollectorAPI(TestCase):
             {'SK': {'timestamp': 5, 'objectId': 'counterfeitObjectId', 'userRawdataId': 'counterfeitRawdataId'},
              'PK': {'timestamp': 5}}]
         self.assertEqual(senz_collected, result['result'])
+
+        # case 2
+        data = {
+            "primary_key": "HK",
+            "filter": 1,
+            "timelines": {
+                "PK": [{"timestamp": 1, 'objectId': 'o1', 'userRawdataId': 'u1'},
+                       {"timestamp": 3, 'objectId': 'o3', 'userRawdataId': 'u3'},
+                       {"timestamp": 5, 'objectId': 'o5', 'userRawdataId': 'u5'}],
+                "SK": [{"timestamp": 1, 'objectId': 'So1', 'userRawdataId': 'uS1'},
+                       {"timestamp": 3, 'objectId': 'So3', 'userRawdataId': 'uS3'},
+                       {"timestamp": 5, 'objectId': 'So5', 'userRawdataId': 'uS5'}],
+            }
+        }
+        rv = self.app.post('/', data=json.dumps(data))
+        self.assertEqual(200, rv.status_code)
+        result = json.loads(rv.data)
+        self.assertEqual(0, result['code'])

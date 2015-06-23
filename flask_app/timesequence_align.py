@@ -187,6 +187,39 @@ def _find_nearest_node(primary_node, node_list):
     return sorted_list[index-1] if abs(sorted_list[index-1]-primary_node) <= abs(sorted_list[index+1]-primary_node) else sorted_list[index+1]
 
 
+def _find_nearest_timestamp(primary_timestamp, node_list):
+    """Find the most nearest node in node_list with primary_timestamp
+
+    Parameters
+    ----------
+    primary_timestamp: timestamp
+    node_list: array_like, shape(1, n)
+      elems in node_list are dict, must have a key 'timestamp'
+
+    Returns
+    -------
+    nearest_node: dict
+      node in node_list
+    """
+    sorted_list = [e['timestamp'] for e in node_list]
+    sorted_list.append(primary_timestamp)
+    sorted_list.sort()
+    index = sorted_list.index(primary_timestamp)
+
+    if index == 0:
+        nearest_timestamp = sorted_list[index+1]
+    elif index == len(sorted_list) - 1:
+        nearest_timestamp = sorted_list[index-1]
+    else:
+        nearest_timestamp = sorted_list[index-1] if abs(primary_timestamp-sorted_list[index-1]) <= abs(primary_timestamp-sorted_list[index+1]) else sorted_list[index+1]
+
+    for node in node_list:
+        if node['timestamp'] == nearest_timestamp:
+            return node
+
+    return {}
+
+
 def _generate_senz_collected(primary_sequence, secondary_sequences, var_filter):
     """Generate pure integer result of senz lists
 
@@ -256,18 +289,35 @@ def collect_senz_lists(data):
     logger.info('[Choose PK] primary_key: %s' % (primary_key))
 
     # Step 2: generate senz_collected
-    primary_sequence = {primary_key: data['timelines'][primary_key]}
+    # primary_sequence = {primary_key: data['timelines'][primary_key]}
     secondary_sequences = {}
     for key in data['timelines']:
         if key != primary_key:
             secondary_sequences[key] = data['timelines'][key]
 
     # process sequences
-    for key, value in primary_sequence.iteritems():
-        value = [elem['timestamp'] for elem in value]
-        primary_sequence[key] = np.array(value)
-    for key, value in secondary_sequences.iteritems():
-        value = [elem['timestamp'] for elem in value]
-        secondary_sequences[key] = np.array(value)
+    senz_collected = []
+    for p_nodes in data['timelines'][primary_key]:
+        senz_collected_elem = {primary_key: p_nodes}
+        for secondary_key, secondary_value in secondary_sequences.iteritems():
+            # handle empty case
+            if len(secondary_value) < 1:
+                nearest_node = {
+                    "objectId": "counterfeitObjectId",
+                    "userRawdataId": "counterfeitRawdataId",
+                    "timestamp": p_nodes['timestamp']
+                }
+                senz_collected_elem[secondary_key] = nearest_node
+                continue
 
-    return _generate_senz_collected(primary_sequence, secondary_sequences, data['filter'])
+            nearest_node = _find_nearest_timestamp(p_nodes['timestamp'], secondary_value)
+            if (p_nodes['timestamp'] - nearest_node['timestamp']) ** 2 > data['filter']:
+                nearest_node = {
+                    "objectId": "counterfeitObjectId",
+                    "userRawdataId": "counterfeitRawdataId",
+                    "timestamp": p_nodes['timestamp']
+                }
+            senz_collected_elem[secondary_key] = nearest_node
+        senz_collected.append(senz_collected_elem)
+
+    return senz_collected
