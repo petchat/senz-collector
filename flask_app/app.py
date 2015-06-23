@@ -64,25 +64,25 @@ def senzCollectorAPI():
     try:
         incoming_data = json.loads(request.data)
     except ValueError, err_msg:
-        logger.exception('%s, [ValueError] err_msg: %s, params=%s' % (x_request_id, err_msg, request.data))
+        logger.exception('<%s>, [ValueError] err_msg: %s, params=%s' % (x_request_id, err_msg, request.data))
         result['message'] = 'Unvalid params: NOT a JSON Object'
         return json.dumps(result)
 
     # params key checking
     for key in ['filter', 'timelines']:
         if key not in incoming_data:
-            logger.exception("%s, [KeyError] params=%s, should have key: %s" % (x_request_id, incoming_data, key))
+            logger.exception("<%s>, [KeyError] params=%s, should have key: %s" % (x_request_id, incoming_data, key))
             result['message'] = "Params content Error: cant't find key=%s" % (key)
             return json.dumps(result)
 
-    logger.info('%s, [log.rawsenz] valid request with params=%s' %(x_request_id, incoming_data))
+    logger.info('<%s>, [log.rawsenz] valid request with params=%s' %(x_request_id, incoming_data))
 
     try:
         result['result'] = collect_senz_lists(incoming_data)
         result['code'] = 0
         result['message'] = 'success'
     except Exception, e:
-        logger.exception('%s, [Exception] generate result error: %s' % (x_request_id, str(e)))
+        logger.exception('<%s>, [Exception] generate result error: %s' % (x_request_id, str(e)))
         result['code'] = 1
         result['message'] = '500 Internal Error'
         return json.dumps(result)
