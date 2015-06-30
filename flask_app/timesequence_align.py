@@ -150,6 +150,13 @@ def choose_primary_key(timelines):
     for measure_list in measures:
         mul_measure = reduce(lambda x, y: x * y, measure_list)
         measures_reduced.append(mul_measure)
+    if max(measures_reduced) == 0:  # 乘法的指标容易产生最大为0的结果
+        measures_reduced = []
+        for measure_list in measures:
+            mul_measure = reduce(lambda x, y: x + y, measure_list)
+            measures_reduced.append(mul_measure)
+    if max(measures_reduced) == 0:  # 如果加法的指标还是0，就返回空结果
+        return ''
     best_measure = max(measures_reduced)
 
     # get primary key
@@ -285,7 +292,10 @@ def collect_senz_lists(data):
       elem of senz_collected is a senz tuple
     """
     # Step 1: choose data's primary key
-    primary_key = choose_primary_key(data['timelines'])
+    if not choose_primary_key(data['timelines']):
+        primary_key = data['primary_key']
+    else:
+        primary_key = choose_primary_key(data['timelines'])
     logger.info('[Choose PK] primary_key: %s' % (primary_key))
 
     # Step 2: generate senz_collected

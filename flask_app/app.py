@@ -17,7 +17,10 @@ import logging
 
 # Configure Logentries
 logger = logging.getLogger('logentries')
-logger.setLevel(logging.DEBUG)
+if APP_ENV == 'prod':
+    logger.setLevel(logging.info)
+else:
+    logger.setLevel(logging.DEBUG)
 logentries_handler = LogentriesHandler(LOGENTRIES_TOKEN)
 logger.addHandler(logentries_handler)
 
@@ -38,7 +41,7 @@ def init_before_first_request():
     import datetime
 
     init_tag = "[Initiation of Service Process]\n"
-    logger.info('[init] enter init before_first_request')
+    logger.info('[init] enter init_before_first_request')
 
     log_init_time = "Initiation START at: \t%s\n" % datetime.datetime.now()
     log_app_env = "Environment Variable: \t%s\n" % APP_ENV
@@ -57,7 +60,7 @@ def senzCollectorAPI():
     else:
         x_request_id = ''
 
-    logger.info('[senzCollector API] enter API')
+    logger.info('<%s>, [senzCollector API] enter API' %(x_request_id))
     result = {'code': 1, 'message': ''}
 
     # params JSON validate
@@ -75,7 +78,8 @@ def senzCollectorAPI():
             result['message'] = "Params content Error: cant't find key=%s" % (key)
             return json.dumps(result)
 
-    logger.info('<%s>, [log.rawsenz] valid request with params=%s' %(x_request_id, incoming_data))
+    logger.info('<%s>, [log.rawsenz] valid request' % (x_request_id))
+    logger.debug('<%s>, [log.rawsenz] valid request with params=%s' % (x_request_id, incoming_data))
 
     try:
         result['result'] = collect_senz_lists(incoming_data)
@@ -87,6 +91,7 @@ def senzCollectorAPI():
         result['message'] = '500 Internal Error'
         return json.dumps(result)
 
+    logger.debug('<%s>, [log.rawsenz] result: %s' % (x_request_id, result['result']))
     return json.dumps(result)
 
 
