@@ -18,7 +18,7 @@ import logging
 # Configure Logentries
 logger = logging.getLogger('logentries')
 if APP_ENV == 'prod':
-    logger.setLevel(logging.info)
+    logger.setLevel(logging.INFO)
 else:
     logger.setLevel(logging.DEBUG)
 logentries_handler = LogentriesHandler(LOGENTRIES_TOKEN)
